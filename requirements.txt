@@ -1,0 +1,7 @@
+streamlit
+transformers
+Pillow
+torch
+tensorflow
+pytube
+openai
