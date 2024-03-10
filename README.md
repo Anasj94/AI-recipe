@@ -1,4 +1,4 @@
-# AI Recipe Generator
+# Culinary Innovations: AI-Driven Recipe Generation 🍽️
 
 Welcome to the AI Recipe Generator! This repository contains code for generating recipes using artificial intelligence.
 
