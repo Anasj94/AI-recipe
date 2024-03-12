@@ -290,7 +290,7 @@ def main():
             progress_text = "Operation in progress. Please wait."
             my_bar = st.progress(0, text=progress_text)
 
-            with st.spinner("We are working on generating recipe for you @uOttawa"):
+            with st.spinner("We are working on generating recipe for you MCR Lab"):
                 for percent_complete in range(100):
                     time.sleep(0.01)
                     my_bar.progress(percent_complete + 1, text=progress_text)
