@@ -10,8 +10,6 @@ import datetime
 from openai import OpenAI
 from pytube import Search
 from dotenv import load_dotenv
-import base64
-import requests
 
 # Load environment variables from .env file
 load_dotenv()
@@ -198,48 +196,6 @@ def search_youtube(query):
     video_urls = [video.watch_url for video in search_results.results[:5]]  # Limiting to top 5 results
     return video_urls
 
-# Function to encode the image
-def encode_image(image_file):
-    return base64.b64encode(image_file.read()).decode('utf-8')
-
-# Function to make request to OpenAI API
-def get_ingredients(image_path):
-    base64_image = encode_image(image_path)
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
-
-    payload = {
-        "model": "gpt-4-vision-preview",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "what are the ingredients in this picture? Give each ingredient with comma separated only"
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
-            }
-        ],
-        "max_tokens": 300
-    }
-
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    return response.json()['choices'][0]['message']['content']
-
-
-import streamlit as st
-from PIL import Image
-import time
-
 def main():
     """Main function for running the Streamlit application."""
     st.set_page_config(
@@ -252,29 +208,19 @@ def main():
     st.header("Culinary Innovations: AI-Driven Recipe Generation 🍽️")
     st.divider()
     tab1, tab2 = st.columns([1, 1])  # Split the layout into two columns to display both tabs
-    
     with tab1:
         st.image(Image.open("asset/images/MCR_Logo-1024x608.png"), width=400)
 
-        uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg"])
-            
-        if uploaded_file is not None:
-            if uploaded_file.type.startswith('image/'):
-                result = get_ingredients(uploaded_file)
-                if result:
-                    st.write("Detected Ingredients:")
-                    st.write(result)
-                    items = st.text_area(
-                    'Insert your food items here (separated by `,`): ',
-                    result  # Set the default value of the text area to the result
-                    )
-                else:
-                    st.error("Please upload a valid image file.")
-        else:
-            items = st.text_area(
-                'Insert your food items here (separated by `,`): ',
-                ""
-            )
+        prompt = "Random"
+        if prompt == "Random":
+            prompt_box = ""
+
+        items = st.text_area(
+            'Insert your food items here (separated by `,`): ',
+            pure_comma_separation(prompt_box, return_list=False),
+        )
+        items = pure_comma_separation(items, return_list=False)
+        entered_items = st.empty()
 
         recipe_button = st.button('Generate Recipe')
 
@@ -282,9 +228,7 @@ def main():
             "<hr />",
             unsafe_allow_html=True
         )
-
         if recipe_button:
-            entered_items = st.empty()
             entered_items.markdown("**Ingredients:** " + items)
         
             progress_text = "Operation in progress. Please wait."
@@ -307,6 +251,7 @@ def main():
 
                     title = generated_recipe["title"]
 
+
                     ingredients = extention.ingredients(
                         generated_recipe["ingredients"],
                         pure_comma_separation(items, return_list=True)
@@ -328,42 +273,46 @@ def main():
 
                     directions = extention.directions(generated_recipe["directions"])
 
-                    with st.container():
-                        # Information in the left column
-                        st.markdown(
-                            " ".join([
-                                "<div class='r-text-recipe'>",
-                                "<div class='food-title'>",
-                                f"<img src='{image_url}' />",
-                                f"<h2 class='font-title text-bold'>{title}</h2>",
-                                "</div>",
-                                '<div class="divider"><div class="divider-mask"></div></div>',
-                                "<h3 class='ingredients font-body text-bold'>Ingredients</h3>",
-                                "<ul class='ingredients-list font-body'>",
-                                " ".join([f'<li>{item}</li>' for item in ingredients]),
-                                "</ul>",
-                                "</div>"
-                            ]),
-                            unsafe_allow_html=True
-                        )
+                    r1, _ = st.columns([6, 2])
 
-                        # Information in the right column
-                        st.markdown(
-                            " ".join([
-                                "<h3 class='directions font-body text-bold'>How to Prepare</h3>",
-                                "<ol class='ingredients-list font-body'>",
-                                " ".join([f'<li>{item}</li>' for item in directions]),
-                                "</ol>",
-                                "</div>"
-                            ]),
-                            unsafe_allow_html=True
-                        )
+                    with r1:
+                        with st.container():
+                            # Information in the left column
+                            st.markdown(
+                                " ".join([
+                                    "<div class='r-text-recipe'>",
+                                    "<div class='food-title'>",
+                                    f"<img src='{image_url}' />",
+                                    f"<h2 class='font-title text-bold'>{title}</h2>",
+                                    "</div>",
+                                    '<div class="divider"><div class="divider-mask"></div></div>',
+                                    "<h3 class='ingredients font-body text-bold'>Ingredients</h3>",
+                                    "<ul class='ingredients-list font-body'>",
+                                    " ".join([f'<li>{item}</li>' for item in ingredients]),
+                                    "</ul>",
+                                    "</div>"
+                                ]),
+                                unsafe_allow_html=True
+                            )
 
+                        with st.container():
+                            # Information in the right column
+                            st.markdown(
+                                " ".join([
+                                    "<h3 class='directions font-body text-bold'>How to Prepare</h3>",
+                                    "<ol class='ingredients-list font-body'>",
+                                    " ".join([f'<li>{item}</li>' for item in directions]),
+                                    "</ol>",
+                                    "</div>"
+                                ]),
+                                unsafe_allow_html=True
+                            )
                         # Display search results
-                        if "video_urls" in locals():
-                            st.markdown("### Suggested Videos:")
-                            for video_url in video_urls:
-                                st.video(video_url)  # Display the video inline
+                            if "video_urls" in locals():
+                                st.markdown("### Suggested Videos:")
+                                for video_url in video_urls:
+                                    st.video(video_url)  # Display the video inline
+
 
     with tab2:  # Include the second tab for displaying contact information
         st.header("Information")
@@ -373,4 +322,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
