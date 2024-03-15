@@ -7,3 +7,4 @@ pytube
 openai
 python-dotenv
 requests
+tf-keras==2.7.0
