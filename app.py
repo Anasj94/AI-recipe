@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import base64
 import requests
 
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -24,6 +25,9 @@ if api_key is None:
 
 # Initialize OpenAI client with the API key
 client = OpenAI(api_key=api_key)
+
+community = "flax-community"
+t5 = "t5-recipe-generation"
 
 def unique_list(seq):
     """Return unique elements of a list while preserving the order."""
@@ -55,7 +59,7 @@ class TextGeneration:
         self.tokenizer = None
         self.generator = None
         self.task = "text2text-generation"
-        self.model_name_or_path = "flax-community/t5-recipe-generation"
+        self.model_name_or_path = community+"/"+t5
         set_seed(42)
 
     def prettifying_text(self, text):
