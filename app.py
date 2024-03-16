@@ -133,12 +133,21 @@ class TextGeneration:
 
         return recipe
 
-@st.cache_data(hash_funcs={TextGeneration: lambda x: None})
+# Initialize a global variable to hold the TextGeneration object
+text_generator = None
+
 def load_text_generator():
-    """Load the text generation model and cache it."""
-    generator = TextGeneration()
-    generator.load()
-    return generator
+    """
+    Load the text generation model.
+
+    Returns:
+        TextGeneration: The text generation model instance.
+    """
+    global text_generator
+    if text_generator is None:
+        text_generator = TextGeneration()
+        text_generator.load()
+    return text_generator
 
 # Default parameters for generating text
 cook = { 
