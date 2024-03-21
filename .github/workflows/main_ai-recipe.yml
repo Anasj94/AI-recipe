@@ -73,6 +73,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
-          app-name: 'ai-recipe'
+          app-name: 'app'
           slot-name: 'Production'
           
