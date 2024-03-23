@@ -285,7 +285,7 @@ def main():
                     st.error("Please upload a valid image file.")
         else:
             items = st.text_area(
-                'Insert your food items here (separated by `,`): ',
+                'Enter ingredients (Comma Seperated, for example: apple,banana ',
                 ""
             )
 
