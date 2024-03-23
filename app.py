@@ -275,17 +275,17 @@ def main():
             if uploaded_file.type.startswith('image/'):
                 result = get_ingredients(uploaded_file)
                 if result:
-                    st.write("Detected Ingredients:")
+                    st.write("The ingredients that our model found are such as:")
                     st.write(result)
                     items = st.text_area(
-                    'Insert your food items here (separated by `,`): ',
+                    'Enter ingredients (Comma Seperated, for example: apple,banana) ',
                     result  # Set the default value of the text area to the result
                     )
                 else:
                     st.error("Please upload a valid image file.")
         else:
             items = st.text_area(
-                'Enter ingredients (Comma Seperated, for example: apple,banana ',
+                'Enter ingredients (Comma Seperated, for example: apple,banana) ',
                 ""
             )
 
